@@ -1,0 +1,1149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LoanCore360 — ER Diagram</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700&family=Syne:wght@400;600;700;800&display=swap');
+
+  :root {
+    --bg: #0a0d14;
+    --surface: #111520;
+    --border: #1e2535;
+    --accent: #00d4ff;
+    --accent2: #7c3aed;
+    --accent3: #10b981;
+    --accent4: #f59e0b;
+    --accent5: #ef4444;
+    --text: #e2e8f0;
+    --muted: #64748b;
+    --pk: #fbbf24;
+    --fk: #60a5fa;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    overflow: hidden;
+    height: 100vh;
+    width: 100vw;
+  }
+
+  #header {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    padding: 12px 24px;
+    background: rgba(10,13,20,0.95);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    backdrop-filter: blur(12px);
+  }
+
+  #header h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: 18px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    color: var(--accent);
+  }
+
+  #header p { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+  .legend {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    font-size: 11px;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .legend-dot {
+    width: 10px; height: 10px;
+    border-radius: 2px;
+  }
+
+  #controls {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .ctrl-btn {
+    width: 36px; height: 36px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-size: 16px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s;
+  }
+
+  .ctrl-btn:hover {
+    background: var(--border);
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  #canvas-wrap {
+    position: fixed;
+    top: 58px; left: 0; right: 0; bottom: 0;
+    overflow: hidden;
+    cursor: grab;
+  }
+
+  #canvas-wrap.grabbing { cursor: grabbing; }
+
+  #canvas {
+    position: absolute;
+    transform-origin: 0 0;
+  }
+
+  svg.connections {
+    position: absolute;
+    top: 0; left: 0;
+    pointer-events: none;
+    overflow: visible;
+  }
+
+  .table-card {
+    position: absolute;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    width: 230px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.5);
+    transition: box-shadow 0.2s, border-color 0.2s;
+    cursor: move;
+    user-select: none;
+  }
+
+  .table-card:hover {
+    box-shadow: 0 0 0 2px var(--accent), 0 8px 32px rgba(0,212,255,0.15);
+    border-color: var(--accent);
+    z-index: 50;
+  }
+
+  .table-card.active {
+    box-shadow: 0 0 0 2px var(--accent), 0 12px 40px rgba(0,212,255,0.25);
+    border-color: var(--accent);
+    z-index: 60;
+  }
+
+  .table-header {
+    padding: 10px 12px;
+    border-radius: 9px 9px 0 0;
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+  }
+
+  .table-header .module-tag {
+    font-size: 9px;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 400;
+    opacity: 0.7;
+    margin-left: auto;
+    padding: 2px 5px;
+    border-radius: 4px;
+    background: rgba(255,255,255,0.08);
+  }
+
+  .table-body {
+    padding: 6px 0 8px;
+  }
+
+  .field-row {
+    display: flex;
+    align-items: center;
+    padding: 3px 12px;
+    font-size: 11px;
+    gap: 6px;
+    transition: background 0.1s;
+  }
+
+  .field-row:hover { background: rgba(255,255,255,0.03); }
+
+  .field-badge {
+    font-size: 9px;
+    padding: 1px 4px;
+    border-radius: 3px;
+    font-weight: 700;
+    min-width: 22px;
+    text-align: center;
+  }
+
+  .pk { background: rgba(251,191,36,0.15); color: var(--pk); }
+  .fk { background: rgba(96,165,250,0.15); color: var(--fk); }
+  .empty { min-width: 22px; }
+
+  .field-name { color: var(--text); flex: 1; }
+  .field-type { color: var(--muted); font-size: 10px; }
+
+  /* Module color palettes */
+  .m1 .table-header { background: linear-gradient(135deg, #1a1f35, #0f1729); border-bottom: 2px solid #6366f1; }
+  .m1 .table-header { color: #818cf8; }
+  .m2 .table-header { background: linear-gradient(135deg, #1a2535, #0f1f29); border-bottom: 2px solid #00d4ff; }
+  .m2 .table-header { color: #00d4ff; }
+  .m3 .table-header { background: linear-gradient(135deg, #1a3520, #0f2918); border-bottom: 2px solid #10b981; }
+  .m3 .table-header { color: #10b981; }
+  .m4 .table-header { background: linear-gradient(135deg, #35201a, #291808); border-bottom: 2px solid #f59e0b; }
+  .m4 .table-header { color: #f59e0b; }
+  .m5 .table-header { background: linear-gradient(135deg, #351a1a, #290808); border-bottom: 2px solid #ef4444; }
+  .m5 .table-header { color: #ef4444; }
+  .m6 .table-header { background: linear-gradient(135deg, #1a3035, #082025); border-bottom: 2px solid #06b6d4; }
+  .m6 .table-header { color: #06b6d4; }
+  .m7 .table-header { background: linear-gradient(135deg, #2a1a35, #1a0829); border-bottom: 2px solid #a855f7; }
+  .m7 .table-header { color: #a855f7; }
+  .m8 .table-header { background: linear-gradient(135deg, #352a1a, #291e08); border-bottom: 2px solid #d97706; }
+  .m8 .table-header { color: #d97706; }
+  .m9 .table-header { background: linear-gradient(135deg, #1a3530, #083525); border-bottom: 2px solid #14b8a6; }
+  .m9 .table-header { color: #14b8a6; }
+
+  .conn-line {
+    stroke-width: 1.5;
+    fill: none;
+    opacity: 0.5;
+    transition: opacity 0.2s;
+  }
+
+  .conn-line.highlighted { opacity: 1; stroke-width: 2.5; }
+
+  #tooltip {
+    position: fixed;
+    background: rgba(17,21,32,0.98);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 11px;
+    pointer-events: none;
+    z-index: 200;
+    display: none;
+    max-width: 260px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+  }
+
+  #tooltip h4 {
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    margin-bottom: 6px;
+    color: var(--accent);
+  }
+
+  #tooltip p { color: var(--muted); line-height: 1.6; }
+  #tooltip .rel { color: var(--fk); margin-top: 6px; }
+
+  .grid-bg {
+    position: absolute;
+    top: 0; left: 0;
+    width: 4000px; height: 3000px;
+    background-image:
+      linear-gradient(var(--border) 1px, transparent 1px),
+      linear-gradient(90deg, var(--border) 1px, transparent 1px);
+    background-size: 40px 40px;
+    opacity: 0.3;
+    pointer-events: none;
+  }
+
+  #mini-map {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    width: 160px;
+    height: 100px;
+    background: rgba(17,21,32,0.9);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    z-index: 100;
+  }
+
+  #mini-map canvas {
+    width: 100%;
+    height: 100%;
+  }
+
+  .info-panel {
+    position: fixed;
+    top: 78px;
+    right: 20px;
+    width: 280px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+    z-index: 100;
+    font-size: 12px;
+    max-height: calc(100vh - 100px);
+    overflow-y: auto;
+    display: none;
+  }
+
+  .info-panel h3 {
+    font-family: 'Syne', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    margin-bottom: 12px;
+    color: var(--accent);
+  }
+
+  .info-panel .close-btn {
+    float: right;
+    background: none;
+    border: none;
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 16px;
+  }
+
+  .info-section { margin-bottom: 12px; }
+  .info-label { color: var(--muted); font-size: 10px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
+  .info-value { color: var(--text); line-height: 1.7; }
+  .rel-chip {
+    display: inline-block;
+    background: rgba(96,165,250,0.1);
+    border: 1px solid rgba(96,165,250,0.2);
+    color: var(--fk);
+    padding: 2px 7px;
+    border-radius: 4px;
+    margin: 2px;
+    font-size: 10px;
+  }
+</style>
+</head>
+<body>
+
+<div id="header">
+  <div>
+    <h1>⬡ LoanCore360 — Entity Relationship Diagram</h1>
+    <p>20 Tables · 10 Modules · Drag to move tables · Click for details · Scroll to zoom</p>
+  </div>
+  <div class="legend">
+    <div class="legend-item"><div class="legend-dot" style="background:#fbbf24"></div> PK</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#60a5fa"></div> FK</div>
+    <div style="width:1px;height:20px;background:var(--border);margin:0 4px"></div>
+    <!-- Crow's foot SVG mini legends -->
+    <div class="legend-item">
+      <svg width="36" height="18" style="vertical-align:middle">
+        <line x1="4" y1="9" x2="32" y2="9" stroke="#94a3b8" stroke-width="1.5"/>
+        <line x1="26" y1="4" x2="26" y2="14" stroke="#94a3b8" stroke-width="1.8"/>
+        <line x1="20" y1="4" x2="20" y2="14" stroke="#94a3b8" stroke-width="1.8"/>
+      </svg>
+      <span style="font-size:10px;color:var(--muted)">Exactly One</span>
+    </div>
+    <div class="legend-item">
+      <svg width="36" height="18" style="vertical-align:middle">
+        <line x1="4" y1="9" x2="32" y2="9" stroke="#94a3b8" stroke-width="1.5"/>
+        <line x1="26" y1="4" x2="26" y2="14" stroke="#94a3b8" stroke-width="1.8"/>
+        <circle cx="15" cy="9" r="4" fill="none" stroke="#94a3b8" stroke-width="1.5"/>
+      </svg>
+      <span style="font-size:10px;color:var(--muted)">Zero or One</span>
+    </div>
+    <div class="legend-item">
+      <svg width="44" height="18" style="vertical-align:middle">
+        <line x1="4" y1="9" x2="38" y2="9" stroke="#94a3b8" stroke-width="1.5"/>
+        <line x1="34" y1="4" x2="34" y2="14" stroke="#94a3b8" stroke-width="1.8"/>
+        <line x1="34" y1="9" x2="20" y2="4" stroke="#94a3b8" stroke-width="1.5"/>
+        <line x1="34" y1="9" x2="20" y2="14" stroke="#94a3b8" stroke-width="1.5"/>
+      </svg>
+      <span style="font-size:10px;color:var(--muted)">One or Many</span>
+    </div>
+    <div class="legend-item">
+      <svg width="44" height="18" style="vertical-align:middle">
+        <line x1="4" y1="9" x2="38" y2="9" stroke="#94a3b8" stroke-width="1.5"/>
+        <circle cx="30" cy="9" r="4" fill="none" stroke="#94a3b8" stroke-width="1.5"/>
+        <line x1="24" y1="9" x2="10" y2="4" stroke="#94a3b8" stroke-width="1.5"/>
+        <line x1="24" y1="9" x2="10" y2="14" stroke="#94a3b8" stroke-width="1.5"/>
+      </svg>
+      <span style="font-size:10px;color:var(--muted)">Zero or Many</span>
+    </div>
+    <div style="width:1px;height:20px;background:var(--border);margin:0 4px"></div>
+    <div class="legend-item"><div class="legend-dot" style="background:#6366f1"></div> IAM</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#00d4ff"></div> Customer</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#10b981"></div> Product</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#f59e0b"></div> Credit</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#ef4444"></div> Account</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#06b6d4"></div> Servicing</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#a855f7"></div> Collections</div>
+  </div>
+</div>
+
+<div id="canvas-wrap">
+  <div id="canvas">
+    <div class="grid-bg"></div>
+    <svg class="connections" id="svg-layer"></svg>
+  </div>
+</div>
+
+<div id="controls">
+  <button class="ctrl-btn" id="zoom-in" title="Zoom In">+</button>
+  <button class="ctrl-btn" id="zoom-out" title="Zoom Out">−</button>
+  <button class="ctrl-btn" id="reset-view" title="Reset View">⊙</button>
+</div>
+
+<div id="tooltip"></div>
+<div class="info-panel" id="info-panel">
+  <button class="close-btn" onclick="closePanel()">✕</button>
+  <div id="info-content"></div>
+</div>
+
+<script>
+const TABLES = [
+  {
+    id: 'User', module: 1, moduleTag: 'IAM',
+    x: 60, y: 80,
+    desc: 'Stores all system users with their roles. Central to authentication and authorization across all modules.',
+    relations: ['AuditLog → UserID', 'Notification → UserID'],
+    fields: [
+      { name: 'UserID', pk: true, type: 'INT' },
+      { name: 'Name', type: 'VARCHAR' },
+      { name: 'Role', type: 'ENUM' },
+      { name: 'Email', type: 'VARCHAR' },
+      { name: 'Phone', type: 'VARCHAR' },
+    ]
+  },
+  {
+    id: 'AuditLog', module: 1, moduleTag: 'IAM',
+    x: 320, y: 80,
+    desc: 'Tracks every user action for security, compliance and regulatory audit trails.',
+    relations: ['UserID → User.UserID'],
+    fields: [
+      { name: 'AuditID', pk: true, type: 'INT' },
+      { name: 'UserID', fk: true, type: 'INT' },
+      { name: 'Action', type: 'VARCHAR' },
+      { name: 'Resource', type: 'VARCHAR' },
+      { name: 'Timestamp', type: 'DATETIME' },
+      { name: 'Metadata', type: 'JSON' },
+    ]
+  },
+  {
+    id: 'Customer', module: 2, moduleTag: 'APP',
+    x: 60, y: 380,
+    desc: 'Master record for all borrowers — both retail and corporate. Stores KYC status and contact info.',
+    relations: ['LoanApplication → CustomerID'],
+    fields: [
+      { name: 'CustomerID', pk: true, type: 'INT' },
+      { name: 'Name', type: 'VARCHAR' },
+      { name: 'DOB', type: 'DATE' },
+      { name: 'ContactInfo', type: 'JSON' },
+      { name: 'KYCStatus', type: 'ENUM' },
+      { name: 'Segment', type: 'ENUM' },
+      { name: 'Status', type: 'ENUM' },
+    ]
+  },
+  {
+    id: 'LoanApplication', module: 2, moduleTag: 'APP',
+    x: 330, y: 330,
+    desc: 'Core application record linking a customer to a product request. Tracks lifecycle from Draft → Approved/Rejected.',
+    relations: ['CustomerID → Customer.CustomerID', 'ProductID → LoanProduct.ProductID'],
+    fields: [
+      { name: 'ApplicationID', pk: true, type: 'INT' },
+      { name: 'CustomerID', fk: true, type: 'INT' },
+      { name: 'ProductID', fk: true, type: 'INT' },
+      { name: 'RequestedAmount', type: 'DECIMAL' },
+      { name: 'TenureMonths', type: 'INT' },
+      { name: 'ApplicationDate', type: 'DATE' },
+      { name: 'Status', type: 'ENUM' },
+    ]
+  },
+  {
+    id: 'LoanDocument', module: 2, moduleTag: 'APP',
+    x: 60, y: 640,
+    desc: 'Stores references (file URIs) to uploaded KYC, income, and collateral documents for each application.',
+    relations: ['ApplicationID → LoanApplication.ApplicationID'],
+    fields: [
+      { name: 'DocumentID', pk: true, type: 'INT' },
+      { name: 'ApplicationID', fk: true, type: 'INT' },
+      { name: 'DocumentType', type: 'VARCHAR' },
+      { name: 'FileURI', type: 'TEXT' },
+      { name: 'UploadedDate', type: 'DATE' },
+      { name: 'VerificationStatus', type: 'ENUM' },
+    ]
+  },
+  {
+    id: 'LoanProduct', module: 3, moduleTag: 'PRODUCT',
+    x: 620, y: 80,
+    desc: 'Defines loan product templates: type (TermLoan/OD/CC/Mortgage), limits, tenure, and interest method.',
+    relations: ['InterestRule → ProductID', 'ChargeRule → ProductID', 'LoanApplication → ProductID'],
+    fields: [
+      { name: 'ProductID', pk: true, type: 'INT' },
+      { name: 'Name', type: 'VARCHAR' },
+      { name: 'Category', type: 'ENUM' },
+      { name: 'MinAmount', type: 'DECIMAL' },
+      { name: 'MaxAmount', type: 'DECIMAL' },
+      { name: 'MinTenure', type: 'INT' },
+      { name: 'MaxTenure', type: 'INT' },
+      { name: 'InterestMethod', type: 'ENUM' },
+      { name: 'Status', type: 'ENUM' },
+    ]
+  },
+  {
+    id: 'InterestRule', module: 3, moduleTag: 'PRODUCT',
+    x: 890, y: 60,
+    desc: 'Defines time-bound interest rates for each product. Supports rate changes over time via EffectiveFrom/To.',
+    relations: ['ProductID → LoanProduct.ProductID'],
+    fields: [
+      { name: 'RuleID', pk: true, type: 'INT' },
+      { name: 'ProductID', fk: true, type: 'INT' },
+      { name: 'Rate', type: 'DECIMAL' },
+      { name: 'EffectiveFrom', type: 'DATE' },
+      { name: 'EffectiveTo', type: 'DATE' },
+    ]
+  },
+  {
+    id: 'ChargeRule', module: 3, moduleTag: 'PRODUCT',
+    x: 890, y: 290,
+    desc: 'Configures fee rules per product: processing fees, prepayment penalties, or penal charges — flat or percentage.',
+    relations: ['ProductID → LoanProduct.ProductID'],
+    fields: [
+      { name: 'ChargeID', pk: true, type: 'INT' },
+      { name: 'ProductID', fk: true, type: 'INT' },
+      { name: 'ChargeType', type: 'ENUM' },
+      { name: 'Amount', type: 'DECIMAL' },
+      { name: 'Mode', type: 'ENUM' },
+    ]
+  },
+  {
+    id: 'CreditAppraisal', module: 4, moduleTag: 'CREDIT',
+    x: 330, y: 580,
+    desc: 'Records the analyst\'s credit risk assessment, score, and remarks for a loan application.',
+    relations: ['ApplicationID → LoanApplication.ApplicationID'],
+    fields: [
+      { name: 'AppraisalID', pk: true, type: 'INT' },
+      { name: 'ApplicationID', fk: true, type: 'INT' },
+      { name: 'AnalystID', fk: true, type: 'INT' },
+      { name: 'Score', type: 'DECIMAL' },
+      { name: 'Remarks', type: 'TEXT' },
+      { name: 'AppraisedDate', type: 'DATE' },
+    ]
+  },
+  {
+    id: 'ApprovalStage', module: 4, moduleTag: 'CREDIT',
+    x: 580, y: 540,
+    desc: 'Multi-level approval workflow. Each row is one approver\'s decision (Approve/Reject/Return) for an application.',
+    relations: ['ApplicationID → LoanApplication.ApplicationID'],
+    fields: [
+      { name: 'StageID', pk: true, type: 'INT' },
+      { name: 'ApplicationID', fk: true, type: 'INT' },
+      { name: 'ApproverID', fk: true, type: 'INT' },
+      { name: 'StageName', type: 'VARCHAR' },
+      { name: 'Decision', type: 'ENUM' },
+      { name: 'DecisionDate', type: 'DATE' },
+      { name: 'Notes', type: 'TEXT' },
+    ]
+  },
+  {
+    id: 'LoanAccount', module: 5, moduleTag: 'ACCOUNT',
+    x: 620, y: 760,
+    desc: 'The live loan account created after approval. Contains sanctioned amount, rate, EMI, and current status (Active/Closed/NPA).',
+    relations: ['ApplicationID → LoanApplication.ApplicationID'],
+    fields: [
+      { name: 'LoanAccountID', pk: true, type: 'INT' },
+      { name: 'ApplicationID', fk: true, type: 'INT' },
+      { name: 'LoanNumber', type: 'VARCHAR' },
+      { name: 'SanctionedAmount', type: 'DECIMAL' },
+      { name: 'InterestRate', type: 'DECIMAL' },
+      { name: 'TenureMonths', type: 'INT' },
+      { name: 'EMIAmount', type: 'DECIMAL' },
+      { name: 'StartDate', type: 'DATE' },
+      { name: 'Status', type: 'ENUM' },
+    ]
+  },
+  {
+    id: 'Disbursement', module: 5, moduleTag: 'ACCOUNT',
+    x: 890, y: 500,
+    desc: 'Records each disbursement event — amount, date, transfer mode (NEFT/RTGS), and posting status.',
+    relations: ['LoanAccountID → LoanAccount.LoanAccountID'],
+    fields: [
+      { name: 'DisbursementID', pk: true, type: 'INT' },
+      { name: 'LoanAccountID', fk: true, type: 'INT' },
+      { name: 'Amount', type: 'DECIMAL' },
+      { name: 'DisbursementDate', type: 'DATE' },
+      { name: 'Mode', type: 'ENUM' },
+      { name: 'Status', type: 'ENUM' },
+    ]
+  },
+  {
+    id: 'RepaymentSchedule', module: 6, moduleTag: 'SERVICING',
+    x: 1160, y: 700,
+    desc: 'Auto-generated EMI schedule. Each row = one installment with principal, interest breakdown and due status.',
+    relations: ['LoanAccountID → LoanAccount.LoanAccountID'],
+    fields: [
+      { name: 'ScheduleID', pk: true, type: 'INT' },
+      { name: 'LoanAccountID', fk: true, type: 'INT' },
+      { name: 'InstallmentNo', type: 'INT' },
+      { name: 'DueDate', type: 'DATE' },
+      { name: 'PrincipalDue', type: 'DECIMAL' },
+      { name: 'InterestDue', type: 'DECIMAL' },
+      { name: 'TotalDue', type: 'DECIMAL' },
+      { name: 'Status', type: 'ENUM' },
+    ]
+  },
+  {
+    id: 'Repayment', module: 6, moduleTag: 'SERVICING',
+    x: 1160, y: 480,
+    desc: 'Actual payment transactions made by borrowers — linked to a loan account with component breakdown.',
+    relations: ['LoanAccountID → LoanAccount.LoanAccountID'],
+    fields: [
+      { name: 'RepaymentID', pk: true, type: 'INT' },
+      { name: 'LoanAccountID', fk: true, type: 'INT' },
+      { name: 'PaidDate', type: 'DATE' },
+      { name: 'Amount', type: 'DECIMAL' },
+      { name: 'Mode', type: 'VARCHAR' },
+      { name: 'Component', type: 'ENUM' },
+      { name: 'Status', type: 'ENUM' },
+    ]
+  },
+  {
+    id: 'InterestAccrual', module: 6, moduleTag: 'SERVICING',
+    x: 1160, y: 280,
+    desc: 'Daily/periodic interest accrual records. Used for accounting and regulatory reporting of income recognition.',
+    relations: ['LoanAccountID → LoanAccount.LoanAccountID'],
+    fields: [
+      { name: 'AccrualID', pk: true, type: 'INT' },
+      { name: 'LoanAccountID', fk: true, type: 'INT' },
+      { name: 'PeriodStart', type: 'DATE' },
+      { name: 'PeriodEnd', type: 'DATE' },
+      { name: 'InterestAmount', type: 'DECIMAL' },
+      { name: 'PostedDate', type: 'DATE' },
+    ]
+  },
+  {
+    id: 'DelinquencyRecord', module: 7, moduleTag: 'COLLECTIONS',
+    x: 890, y: 960,
+    desc: 'Tracks overdue loans with days-past-due and bucket classification (0-30, 31-60, 61-90, 90+) for NPA management.',
+    relations: ['LoanAccountID → LoanAccount.LoanAccountID'],
+    fields: [
+      { name: 'DelinquencyID', pk: true, type: 'INT' },
+      { name: 'LoanAccountID', fk: true, type: 'INT' },
+      { name: 'DaysPastDue', type: 'INT' },
+      { name: 'Bucket', type: 'ENUM' },
+      { name: 'Status', type: 'ENUM' },
+    ]
+  },
+  {
+    id: 'CollectionAction', module: 7, moduleTag: 'COLLECTIONS',
+    x: 620, y: 1000,
+    desc: 'Logs every recovery action taken on delinquent accounts — calls, field visits, legal notices.',
+    relations: ['LoanAccountID → LoanAccount.LoanAccountID'],
+    fields: [
+      { name: 'ActionID', pk: true, type: 'INT' },
+      { name: 'LoanAccountID', fk: true, type: 'INT' },
+      { name: 'ActionType', type: 'ENUM' },
+      { name: 'Notes', type: 'TEXT' },
+      { name: 'ActionDate', type: 'DATE' },
+    ]
+  },
+  {
+    id: 'LedgerEntry', module: 8, moduleTag: 'GL',
+    x: 1160, y: 80,
+    desc: 'Internal double-entry ledger for all financial events: disbursements, repayments, charges. Phase-1 internal only.',
+    relations: ['LoanAccountID → LoanAccount.LoanAccountID'],
+    fields: [
+      { name: 'EntryID', pk: true, type: 'INT' },
+      { name: 'LoanAccountID', fk: true, type: 'INT' },
+      { name: 'EntryType', type: 'ENUM' },
+      { name: 'Amount', type: 'DECIMAL' },
+      { name: 'EntryDate', type: 'DATE' },
+      { name: 'Narrative', type: 'TEXT' },
+    ]
+  },
+  {
+    id: 'LoanReport', module: 9, moduleTag: 'ANALYTICS',
+    x: 60, y: 880,
+    desc: 'Snapshot analytics reports — portfolio KPIs, PAR ratios, NPA rates, branch/product performance.',
+    relations: [],
+    fields: [
+      { name: 'ReportID', pk: true, type: 'INT' },
+      { name: 'Scope', type: 'VARCHAR' },
+      { name: 'Metrics', type: 'JSON' },
+      { name: 'GeneratedDate', type: 'DATE' },
+    ]
+  },
+  {
+    id: 'Notification', module: 9, moduleTag: 'ALERTS',
+    x: 330, y: 840,
+    desc: 'In-app notifications for EMI due reminders, overdue alerts, approval/rejection updates sent to users.',
+    relations: ['UserID → User.UserID'],
+    fields: [
+      { name: 'NotificationID', pk: true, type: 'INT' },
+      { name: 'UserID', fk: true, type: 'INT' },
+      { name: 'Message', type: 'TEXT' },
+      { name: 'Category', type: 'ENUM' },
+      { name: 'Status', type: 'ENUM' },
+      { name: 'CreatedDate', type: 'DATETIME' },
+    ]
+  },
+];
+
+// Cardinality notation:
+// fromCard = cardinality symbol at the FROM end (near the FK table)
+// toCard   = cardinality symbol at the TO end   (near the PK table)
+// Types: 'one', 'one-opt', 'many', 'many-opt'
+//   one      = exactly one      ( || )
+//   one-opt  = zero or one      ( |O )
+//   many     = one or many      ( |< crow's foot with bar )
+//   many-opt = zero or many     ( O< crow's foot with circle )
+
+const CONNECTIONS = [
+  // User(1) ──< AuditLog(many)  — one user has many audit logs
+  { from: 'AuditLog', to: 'User', color: '#6366f1',
+    fromCard: 'many', toCard: 'one',
+    label: 'generates', cardinality: '1 : N' },
+
+  // User(1) ──< Notification(many)
+  { from: 'Notification', to: 'User', color: '#6366f1',
+    fromCard: 'many', toCard: 'one',
+    label: 'receives', cardinality: '1 : N' },
+
+  // Customer(1) ──< LoanApplication(many)
+  { from: 'LoanApplication', to: 'Customer', color: '#00d4ff',
+    fromCard: 'many', toCard: 'one',
+    label: 'submits', cardinality: '1 : N' },
+
+  // LoanProduct(1) ──< LoanApplication(many)
+  { from: 'LoanApplication', to: 'LoanProduct', color: '#10b981',
+    fromCard: 'many', toCard: 'one',
+    label: 'uses', cardinality: '1 : N' },
+
+  // LoanApplication(1) ──< LoanDocument(many)
+  { from: 'LoanDocument', to: 'LoanApplication', color: '#00d4ff',
+    fromCard: 'many', toCard: 'one',
+    label: 'has docs', cardinality: '1 : N' },
+
+  // LoanProduct(1) ──< InterestRule(many)
+  { from: 'InterestRule', to: 'LoanProduct', color: '#10b981',
+    fromCard: 'many', toCard: 'one',
+    label: 'defines rate', cardinality: '1 : N' },
+
+  // LoanProduct(1) ──< ChargeRule(many)
+  { from: 'ChargeRule', to: 'LoanProduct', color: '#10b981',
+    fromCard: 'many', toCard: 'one',
+    label: 'defines fee', cardinality: '1 : N' },
+
+  // LoanApplication(1) ──< CreditAppraisal(many-opt)
+  { from: 'CreditAppraisal', to: 'LoanApplication', color: '#f59e0b',
+    fromCard: 'many-opt', toCard: 'one',
+    label: 'appraised by', cardinality: '1 : 0..N' },
+
+  // LoanApplication(1) ──< ApprovalStage(many)
+  { from: 'ApprovalStage', to: 'LoanApplication', color: '#f59e0b',
+    fromCard: 'many', toCard: 'one',
+    label: 'approved via', cardinality: '1 : N' },
+
+  // LoanApplication(1) ──| LoanAccount(one-opt) — 1 app → 0 or 1 account
+  { from: 'LoanAccount', to: 'LoanApplication', color: '#ef4444',
+    fromCard: 'one-opt', toCard: 'one',
+    label: 'creates', cardinality: '1 : 0..1' },
+
+  // LoanAccount(1) ──< Disbursement(many-opt)
+  { from: 'Disbursement', to: 'LoanAccount', color: '#ef4444',
+    fromCard: 'many-opt', toCard: 'one',
+    label: 'disbursed via', cardinality: '1 : 0..N' },
+
+  // LoanAccount(1) ──< RepaymentSchedule(many)
+  { from: 'RepaymentSchedule', to: 'LoanAccount', color: '#06b6d4',
+    fromCard: 'many', toCard: 'one',
+    label: 'scheduled as', cardinality: '1 : N' },
+
+  // LoanAccount(1) ──< Repayment(many-opt)
+  { from: 'Repayment', to: 'LoanAccount', color: '#06b6d4',
+    fromCard: 'many-opt', toCard: 'one',
+    label: 'repaid via', cardinality: '1 : 0..N' },
+
+  // LoanAccount(1) ──< InterestAccrual(many)
+  { from: 'InterestAccrual', to: 'LoanAccount', color: '#06b6d4',
+    fromCard: 'many', toCard: 'one',
+    label: 'accrues', cardinality: '1 : N' },
+
+  // LoanAccount(1) ──< LedgerEntry(many)
+  { from: 'LedgerEntry', to: 'LoanAccount', color: '#d97706',
+    fromCard: 'many', toCard: 'one',
+    label: 'posted to', cardinality: '1 : N' },
+
+  // LoanAccount(1) ──< DelinquencyRecord(many-opt)
+  { from: 'DelinquencyRecord', to: 'LoanAccount', color: '#a855f7',
+    fromCard: 'many-opt', toCard: 'one',
+    label: 'flags', cardinality: '1 : 0..N' },
+
+  // LoanAccount(1) ──< CollectionAction(many-opt)
+  { from: 'CollectionAction', to: 'LoanAccount', color: '#a855f7',
+    fromCard: 'many-opt', toCard: 'one',
+    label: 'actioned by', cardinality: '1 : 0..N' },
+];
+
+// Build DOM
+const canvas = document.getElementById('canvas');
+const svgLayer = document.getElementById('svg-layer');
+const wrap = document.getElementById('canvas-wrap');
+const tableEls = {};
+
+TABLES.forEach(t => {
+  const div = document.createElement('div');
+  div.className = `table-card m${t.module}`;
+  div.id = `table-${t.id}`;
+  div.style.left = t.x + 'px';
+  div.style.top = t.y + 'px';
+
+  const header = `<div class="table-header">
+    <span>⬡</span>
+    <span>${t.id}</span>
+    <span class="module-tag">${t.moduleTag}</span>
+  </div>`;
+
+  const fields = t.fields.map(f => `
+    <div class="field-row">
+      ${f.pk ? '<span class="field-badge pk">PK</span>' : f.fk ? '<span class="field-badge fk">FK</span>' : '<span class="empty"></span>'}
+      <span class="field-name">${f.name}</span>
+      <span class="field-type">${f.type}</span>
+    </div>
+  `).join('');
+
+  div.innerHTML = header + `<div class="table-body">${fields}</div>`;
+
+  // Click
+  div.addEventListener('click', (e) => {
+    if (dragging) return;
+    showPanel(t);
+    document.querySelectorAll('.table-card').forEach(c => c.classList.remove('active'));
+    div.classList.add('active');
+    highlightConnections(t.id);
+  });
+
+  // Drag
+  let startX, startY, startLeft, startTop;
+  let dragging = false;
+  div.addEventListener('mousedown', e => {
+    e.preventDefault();
+    const rect = div.getBoundingClientRect();
+    startX = e.clientX;
+    startY = e.clientY;
+    startLeft = parseInt(div.style.left);
+    startTop = parseInt(div.style.top);
+    dragging = false;
+
+    const onMove = (e) => {
+      const dx = (e.clientX - startX) / scale;
+      const dy = (e.clientY - startY) / scale;
+      if (Math.abs(dx) > 3 || Math.abs(dy) > 3) dragging = true;
+      if (!dragging) return;
+      div.style.left = (startLeft + dx) + 'px';
+      div.style.top = (startTop + dy) + 'px';
+      t.x = startLeft + dx;
+      t.y = startTop + dy;
+      drawConnections();
+    };
+    const onUp = () => {
+      document.removeEventListener('mousemove', onMove);
+      document.removeEventListener('mouseup', onUp);
+      setTimeout(() => { dragging = false; }, 10);
+    };
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', onUp);
+  });
+
+  canvas.appendChild(div);
+  tableEls[t.id] = div;
+});
+
+function getCenter(id) {
+  const t = TABLES.find(x => x.id === id);
+  const el = tableEls[id];
+  return {
+    x: t.x + el.offsetWidth / 2,
+    y: t.y + el.offsetHeight / 2
+  };
+}
+
+function getEdgePoint(fromId, toId) {
+  const t = TABLES.find(x => x.id === fromId);
+  const el = tableEls[fromId];
+  const to = getCenter(toId);
+  const cx = t.x + el.offsetWidth / 2;
+  const cy = t.y + el.offsetHeight / 2;
+  const dx = to.x - cx;
+  const dy = to.y - cy;
+  const w = el.offsetWidth / 2;
+  const h = el.offsetHeight / 2;
+
+  let px, py;
+  if (Math.abs(dx / w) > Math.abs(dy / h)) {
+    px = cx + (dx > 0 ? w : -w);
+    py = cy + dy * (w / Math.abs(dx));
+  } else {
+    py = cy + (dy > 0 ? h : -h);
+    px = cx + dx * (h / Math.abs(dy));
+  }
+  return { x: px, y: py };
+}
+
+const connLines = {};
+
+// Draw crow's foot notation at a point facing direction angle
+function drawCardinalityMarker(svg, x, y, angle, type, color, opacity) {
+  const s = 14; // size/spacing of markers
+  const cos = Math.cos(angle);
+  const sin = Math.sin(angle);
+  // perpendicular
+  const px = -sin;
+  const py = cos;
+
+  const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+  g.setAttribute('opacity', opacity);
+
+  function line(x1, y1, x2, y2) {
+    const l = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    l.setAttribute('x1', x1); l.setAttribute('y1', y1);
+    l.setAttribute('x2', x2); l.setAttribute('y2', y2);
+    l.setAttribute('stroke', color);
+    l.setAttribute('stroke-width', 1.8);
+    l.setAttribute('stroke-linecap', 'round');
+    g.appendChild(l);
+  }
+
+  function circle(cx, cy, r, filled) {
+    const c = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    c.setAttribute('cx', cx); c.setAttribute('cy', cy); c.setAttribute('r', r);
+    c.setAttribute('fill', filled ? color : '#0a0d14');
+    c.setAttribute('stroke', color); c.setAttribute('stroke-width', 1.5);
+    g.appendChild(c);
+  }
+
+  // Bar = vertical line across the connection
+  function bar(dist) {
+    line(
+      x + cos * dist + px * s * 0.55,
+      y + sin * dist + py * s * 0.55,
+      x + cos * dist - px * s * 0.55,
+      y + sin * dist - py * s * 0.55
+    );
+  }
+
+  // Crow's foot (three lines fanning out)
+  function crowFoot(dist) {
+    // center prong
+    line(x, y, x + cos * dist, y + sin * dist);
+    // top prong
+    line(x + cos * dist + px * s * 0.6, y + sin * dist + py * s * 0.6,
+         x + cos * (dist - s * 0.5), y + sin * (dist - s * 0.5));
+    // bottom prong
+    line(x + cos * dist - px * s * 0.6, y + sin * dist - py * s * 0.6,
+         x + cos * (dist - s * 0.5), y + sin * (dist - s * 0.5));
+  }
+
+  if (type === 'one') {
+    // Two bars: exactly one
+    bar(s * 0.5);
+    bar(s * 1.1);
+  } else if (type === 'one-opt') {
+    // Bar + circle: zero or one
+    bar(s * 1.1);
+    circle(x + cos * s * 0.4, y + sin * s * 0.4, 4, false);
+  } else if (type === 'many') {
+    // Crow's foot + bar: one or many
+    crowFoot(s * 1.2);
+    bar(s * 1.5);
+  } else if (type === 'many-opt') {
+    // Crow's foot + circle: zero or many
+    crowFoot(s * 1.2);
+    circle(x + cos * s * 1.8, y + sin * s * 1.8, 4, false);
+  }
+
+  svg.appendChild(g);
+}
+
+function drawConnections() {
+  svgLayer.innerHTML = '';
+  CONNECTIONS.forEach((c, i) => {
+    const p1 = getEdgePoint(c.from, c.to);
+    const p2 = getEdgePoint(c.to, c.from);
+
+    const dx = p2.x - p1.x;
+    const dy = p2.y - p1.y;
+    const cx1 = p1.x + dx * 0.3 + dy * 0.1;
+    const cy1 = p1.y + dy * 0.3 - dx * 0.1;
+    const cx2 = p2.x - dx * 0.3 + dy * 0.1;
+    const cy2 = p2.y - dy * 0.3 - dx * 0.1;
+
+    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    path.setAttribute('d', `M${p1.x},${p1.y} C${cx1},${cy1} ${cx2},${cy2} ${p2.x},${p2.y}`);
+    path.setAttribute('class', 'conn-line');
+    path.setAttribute('stroke', c.color);
+    path.setAttribute('data-from', c.from);
+    path.setAttribute('data-to', c.to);
+    path.id = `conn-${i}`;
+    svgLayer.appendChild(path);
+
+    const opacity = '0.75';
+
+    // Angle at FROM end (p1): direction toward the path = angle from p1 outward
+    const angleFrom = Math.atan2(cy1 - p1.y, cx1 - p1.x);
+    // Angle at TO end (p2): direction inward = angle arriving at p2
+    const angleTo = Math.atan2(p2.y - cy2, p2.x - cx2);
+
+    // Draw marker at FROM end (FK side)
+    drawCardinalityMarker(svgLayer, p1.x, p1.y, angleFrom, c.fromCard, c.color, opacity);
+    // Draw marker at TO end (PK side)
+    drawCardinalityMarker(svgLayer, p2.x, p2.y, -angleTo + Math.PI, c.toCard, c.color, opacity);
+
+    // Cardinality label at midpoint
+    const midX = (p1.x + p2.x) / 2;
+    const midY = (p1.y + p2.y) / 2 - 10;
+    const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    label.setAttribute('x', midX);
+    label.setAttribute('y', midY);
+    label.setAttribute('text-anchor', 'middle');
+    label.setAttribute('fill', c.color);
+    label.setAttribute('font-size', '10');
+    label.setAttribute('font-family', 'JetBrains Mono, monospace');
+    label.setAttribute('font-weight', '600');
+    label.setAttribute('opacity', '0.85');
+
+    // Background pill for label
+    const bg = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+    const labelW = (c.cardinality.length * 6.5) + 10;
+    bg.setAttribute('x', midX - labelW / 2);
+    bg.setAttribute('y', midY - 12);
+    bg.setAttribute('width', labelW);
+    bg.setAttribute('height', 14);
+    bg.setAttribute('rx', 4);
+    bg.setAttribute('fill', '#0a0d14');
+    bg.setAttribute('opacity', '0.85');
+    svgLayer.appendChild(bg);
+
+    label.textContent = c.cardinality;
+    svgLayer.appendChild(label);
+  });
+}
+
+function highlightConnections(id) {
+  document.querySelectorAll('.conn-line').forEach(el => {
+    if (el.dataset.from === id || el.dataset.to === id) {
+      el.classList.add('highlighted');
+    } else {
+      el.classList.remove('highlighted');
+    }
+  });
+}
+
+// Pan & Zoom
+let scale = 0.75, panX = 0, panY = 0;
+let isPanning = false, panStartX, panStartY, panStartPX, panStartPY;
+
+function applyTransform() {
+  canvas.style.transform = `translate(${panX}px, ${panY}px) scale(${scale})`;
+}
+
+wrap.addEventListener('wheel', e => {
+  e.preventDefault();
+  const delta = e.deltaY > 0 ? 0.9 : 1.1;
+  scale = Math.max(0.3, Math.min(2, scale * delta));
+  applyTransform();
+}, { passive: false });
+
+wrap.addEventListener('mousedown', e => {
+  if (e.target === wrap || e.target === canvas || e.target.classList.contains('grid-bg') || e.target === svgLayer) {
+    isPanning = true;
+    panStartX = e.clientX;
+    panStartY = e.clientY;
+    panStartPX = panX;
+    panStartPY = panY;
+    wrap.classList.add('grabbing');
+  }
+});
+
+document.addEventListener('mousemove', e => {
+  if (!isPanning) return;
+  panX = panStartPX + (e.clientX - panStartX);
+  panY = panStartPY + (e.clientY - panStartY);
+  applyTransform();
+});
+
+document.addEventListener('mouseup', () => {
+  isPanning = false;
+  wrap.classList.remove('grabbing');
+});
+
+document.getElementById('zoom-in').onclick = () => { scale = Math.min(2, scale * 1.2); applyTransform(); };
+document.getElementById('zoom-out').onclick = () => { scale = Math.max(0.3, scale * 0.8); applyTransform(); };
+document.getElementById('reset-view').onclick = () => {
+  scale = 0.75; panX = 0; panY = 0;
+  applyTransform();
+  document.querySelectorAll('.table-card').forEach(c => c.classList.remove('active'));
+  document.querySelectorAll('.conn-line').forEach(el => el.classList.remove('highlighted'));
+  closePanel();
+};
+
+function showPanel(t) {
+  const panel = document.getElementById('info-panel');
+  const content = document.getElementById('info-content');
+
+  // Find connections involving this table
+  const outgoing = CONNECTIONS.filter(c => c.from === t.id);
+  const incoming = CONNECTIONS.filter(c => c.to === t.id);
+
+  const relHTML = (outgoing.length + incoming.length) === 0
+    ? '<span style="color:var(--muted)">None (root table)</span>'
+    : [
+        ...outgoing.map(c => `<div style="margin:3px 0"><span class="rel-chip" style="border-color:${c.color};color:${c.color}">${c.from} → ${c.to}</span> <span style="color:var(--muted);font-size:10px">${c.cardinality} (${c.label})</span></div>`),
+        ...incoming.map(c => `<div style="margin:3px 0"><span class="rel-chip" style="border-color:${c.color};color:${c.color}">${c.from} → ${c.to}</span> <span style="color:var(--muted);font-size:10px">${c.cardinality} (${c.label})</span></div>`)
+      ].join('');
+
+  content.innerHTML = `
+    <h3>${t.id}</h3>
+    <div class="info-section">
+      <div class="info-label">Module</div>
+      <div class="info-value">${t.moduleTag}</div>
+    </div>
+    <div class="info-section">
+      <div class="info-label">Description</div>
+      <div class="info-value">${t.desc}</div>
+    </div>
+    <div class="info-section">
+      <div class="info-label">Fields (${t.fields.length})</div>
+      <div class="info-value">${t.fields.map(f =>
+        `<div style="padding:2px 0; color:${f.pk ? 'var(--pk)' : f.fk ? 'var(--fk)' : 'var(--text)'}">
+          ${f.pk ? '🔑' : f.fk ? '🔗' : '·'} ${f.name} <span style="color:var(--muted);font-size:10px">${f.type}</span>
+        </div>`).join('')}
+      </div>
+    </div>
+    <div class="info-section">
+      <div class="info-label">Relationships & Cardinality</div>
+      <div class="info-value">${relHTML}</div>
+    </div>
+  `;
+  panel.style.display = 'block';
+}
+
+function closePanel() {
+  document.getElementById('info-panel').style.display = 'none';
+}
+
+// Initial
+applyTransform();
+setTimeout(drawConnections, 100);
+window.addEventListener('resize', drawConnections);
+</script>
+</body>
+</html>
